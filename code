@@ -1,0 +1,106 @@
+# I show that the rule based classification project which means estimate how much income new customers can generate with the dataset and explained the questions and tasks.
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from matplotlib import pyplot as plt
+
+pd.pandas.set_option('display.max_columns', None)
+######################################################################################################
+# **TASK 1 :**
+# Q1: Read persona.csv and show general information about the data set.
+def load_persona():
+    df = pd.read_csv("persona.csv")
+    return df
+
+df = load_persona()
+df.head()
+df.shape
+df.dtypes
+df.tail
+df.isnull().sum()
+df.quantile([0, 0.05, 0.50, 0.95, 0.99, 1]).T
+
+#Q2: How many unique SOURCE are there? What are their frequencies?
+df["SOURCE"].unique()
+df["SOURCE"].value_counts()
+#Q3: How many unique PRICE are there?
+df["PRICE"].unique()
+#Q4: How many sales were made from which PRICE?
+df["PRICE"].value_counts()
+#Q5: How many sales from which country?
+df["COUNTRY"].value_counts()
+#Q6: How much was earned in total from sales by country?
+df.groupby('COUNTRY')['PRICE'].sum()
+#Q7: What are the sales numbers according to SOURCE types?
+df.groupby("SOURCE")["PRICE"].count()
+#Q8: What are the PRICE averages by country?
+df.groupby("COUNTRY")["PRICE"].mean()
+#Q9: What are the PRICE averages by SOURCEs?
+df.groupby("SOURCE")["PRICE"].mean()
+#Q10: What are the PRICE averages in the COUNTRY-SOURCE breakdown?
+df.groupby(["COUNTRY","SOURCE"])["PRICE"].mean()
+
+# **TASK 2:** What are the total gains broken down by COUNTRY, SOURCE, SEX, AGE?
+#######################################################################################################
+df.groupby(["COUNTRY", "SOURCE", "SEX", "AGE"]).agg({"PRICE": "sum"})
+
+#######################################################################################################
+# **TASK 3:** Sort the output by PRICE.
+agg_df = df.groupby(["COUNTRY", "SOURCE", "SEX", "AGE"]).agg({"PRICE": "sum"}).sort_values("PRICE", ascending=False )
+agg_df
+#######################################################################################################
+# **TASK 4:** Convert the names in the index to variable names.
+agg_df = agg_df.reset_index()
+agg_df.head()
+#######################################################################################################
+# **TASK 5:** Convert age variable to categorical variable and add it to agg_df.
+
+agg_df["AGE_CAT"] = pd.cut(df["AGE"],bins = [0, 18, 24, 30, 40, 70], labels= ["0_18", "19_23", "24_30", "31_40", "41_70"])
+agg_df.head()
+#######################################################################################################
+# **TASK 6:** Identify new level-based customers.
+col_names = ["COUNTRY", "SOURCE", "SEX", "AGE_CAT"]
+agg_df[col_names]
+agg_df["customers_level_based"] = ["_".join(row).upper() for row in agg_df[col_names].values]
+agg_df
+
+agg_df.head()
+agg_df["customers_level_based"].value_counts()
+#singularize
+agg_df = agg_df.groupby("customers_level_based").agg({"PRICE":"mean"})
+agg_df = agg_df.reset_index()
+agg_df.head()
+agg_df["customers_level_based"].value_counts()
+agg_df.head()
+########################################################################################################
+# **TASK 7:** Segment your new customers.
+# Divide new customers
+# (Example: USA_ANDROID_MALE_0_18) into 4 segments according to PRICE.
+# Add the segments to agg_df as variable with SEGMENT naming.
+# Describe the segments (Group by segments and get the price mean, max, sum).
+# Analyze C segment (only extract C segment from dataset and analyze).
+
+agg_df["SEGMENT"] = pd.qcut(agg_df["PRICE"], 4, labels=["D","C","B","A"])
+
+agg_df.groupby("SEGMENT").agg({"PRICE" : ["mean", "max", "sum"]})
+
+agg_df[agg_df["SEGMENT"] == "C"].describe().T
+agg_df.reset_index()
+agg_df.columns
+#########################################################################################################
+# **TASK 7:** Classify new customers according to their segments and estimate how much income it can generate.
+# SAMPLES
+new_user = "TUR_ANDROID_FEMALE_31_40"
+agg_df[agg_df["customers_level_based"] == new_user]
+
+new_user1 = "FRA_IOS_FEMALE_31_40"
+agg_df[agg_df["customers_level_based"] == new_user1]
+
+new_user2  = "TUR_IOS_FEMALE_24_30"
+agg_df[agg_df["customers_level_based"] == new_user2]
+
+new_user3 = "USA_IOS_MALE_31_40"
+agg_df[agg_df["customers_level_based"] == new_user3]
+
+new_user4 = "BRA_ANDROID_FEMALE_31_40"
+agg_df[agg_df["customers_level_based"] == new_user4]
