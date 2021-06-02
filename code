@@ -42,11 +42,11 @@ df.groupby(["COUNTRY","SOURCE"])["PRICE"].mean()
 
 # **TASK 2:** What are the total gains broken down by COUNTRY, SOURCE, SEX, AGE?
 #######################################################################################################
-df.groupby(["COUNTRY", "SOURCE", "SEX", "AGE"]).agg({"PRICE": "sum"})
+df.groupby(["COUNTRY", "SOURCE", "SEX", "AGE"]).agg({"PRICE": "mean"})
 
 #######################################################################################################
 # **TASK 3:** Sort the output by PRICE.
-agg_df = df.groupby(["COUNTRY", "SOURCE", "SEX", "AGE"]).agg({"PRICE": "sum"}).sort_values("PRICE", ascending=False )
+agg_df = df.groupby(["COUNTRY", "SOURCE", "SEX", "AGE"]).agg({"PRICE": "mean"}).sort_values("PRICE", ascending=False )
 agg_df
 #######################################################################################################
 # **TASK 4:** Convert the names in the index to variable names.
